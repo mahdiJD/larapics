@@ -1,5 +1,5 @@
-<div>
+{{-- <div>
     icon {{ $src }}
-</div>
+</div> --}}
 
 <img src="{{$src}}" alt="{{$src}}">

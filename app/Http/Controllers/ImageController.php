@@ -3,22 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+// use App\Http\Controllers\ImageController;
 use App\Http\Requests\ImageRequest;
 use App\Models\Image;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 
 class ImageController extends Controller
 {
     public function __construct(protected $perPage = 15){
-
+        $this->middleware(['auth']);
+        $this->authorizeResource(Image::class);
     }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $images = Image:://published()->
-        latest()->paginate($this->perPage);
+        $images =
+            Image::visibleFor(request()->user())
+            ->latest()
+            ->paginate($this->perPage)
+            -> WithQueryString();
         return view('image.index',compact('images'));
     }
 
@@ -35,7 +41,8 @@ class ImageController extends Controller
      */
     public function store(ImageRequest $request)
     {
-        Image::create($request->getData());
+        $image = Image::create($data = $request->getData());
+        $image->syncTags($data['tags']);
         return to_route('images.index')->with('message','Image has been uploaded Successfully');
     }
 
@@ -44,7 +51,7 @@ class ImageController extends Controller
      */
     public function show(Image $image)
     {
-        return view('image.show',compact('image'));
+        // return view('image.show',compact('image'));
     }
 
     /**
@@ -52,6 +59,10 @@ class ImageController extends Controller
      */
     public function edit(Image $image)
     {
+        if(!Gate::allows('update-image', $image)){
+            return back()->with('message','Access Denied!');
+            // abort(403,'Access Denied!');
+        }
         return view('image.edit',compact('image'));
     }
 
@@ -60,15 +71,24 @@ class ImageController extends Controller
      */
     public function update(ImageRequest $request, Image $image)
     {
-        $image->update($request->getData());
+        $image->update($data = $request->getData());
+        $image->syncTags($data['tags']);
         return to_route('images.index')->with('message','Image has been updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Image $image)
     {
-        //
+        // if(Gate::denies('delete-image', $image)){
+        //     return back()->with('message','Access Denied!');
+        //     // abort(403,'Access Denied!');
+        // }
+
+        // $this->authorize('delete-image', $image);
+        Gate::authorize('delete', $image);
+        $image->delete();
+        return to_route('images.index')->with('message','Image has been deleted successfully!');
     }
 }

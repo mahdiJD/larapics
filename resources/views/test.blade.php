@@ -18,13 +18,25 @@
 {{--    <x-icon :src="$var" />--}}
 {{--    <x-ui.button />--}}
 
-<x-alert id="my-alert" type="success" dismissible class="mt-4 mb-4" role="disable">
-    <x-slot name="title">
+<x-alert type="warning" dismissible id="my-alert"
+class="mt-4 mb-4 " role="disable">
+    {{$component->icon()}}
+    <p class="mb-0">The data has been successfully Removed.
+        {{$component->link("undo")}}
+    </p>
+
+</x-alert>
+<x-form action="/images" method="GET" id="form1">
+    <h1>cfghbj</h1>
+    <input type="text">
+    <button type="submit">submit</button>
+</x-form>
+</body>
+</html>
+
+{{-- <x-slot name="title">
         My Message
     </x-slot>
     <x-slot:message>
         The slot has been submitted!
-    </x-slot:message>
-</x-alert>
-</body>
-</html>
+    </x-slot:message> --}}

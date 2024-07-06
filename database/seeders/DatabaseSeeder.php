@@ -3,7 +3,12 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Comment;
 use App\Models\Image;
+use App\Models\Social;
+use App\Models\Tag;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,6 +33,52 @@ class DatabaseSeeder extends Seeder
                 'dimension' => Image::getDimension($image),
             ]);
         }
+        User::find([2,4,6,8])->each(function($user){
+            $user->social()->save(Social::factory()->make());
+        });
         // Image::factory(10)->create();
+
+        Image::find([1,2])->each(function($image){
+            User::find([1,2,3,4,5,6,7])->each(function($user) use($image){
+                $image->comments()->save(Comment::factory()->make([
+                    'user_id' => $user->id ,
+                    'approved' => rand(0,1) ,
+                ]));
+            });
+        });
+
+        $tags = Tag::factory(10)->create();
+
+        Image::all()->each(function ($image) use($tags){
+            $image->tags()->attach(
+                $tags->pluck('id')->random(rand(2,5)),
+                [
+                    // 'approved' => rand(0,1),
+                    // 'priority' => rand(0,5),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        });
+
+        $users = User::all();
+        Image::all()->each(function($image) use($users){
+            $image->likes()->attach(
+                $users->pluck('id')->random($num_likes = rand(2,7)),
+                [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            $image->favorites()->attach(
+                $users->pluck('id')->random($num_likes = rand(2,7)),
+                [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+            $image->increment('likes_count', $num_likes);
+        });
+
     }
 }

@@ -23,16 +23,20 @@ class ImageRequest extends FormRequest
     public function rules(): array
     {
         if ($this->method()=='PUT'){
-            return ['title' => 'required',];
+            return [
+                'title' => 'required',
+                'tags' => 'required'
+            ];
         }
         return [
             'file' => 'required|image',
             'title' => 'nullable',
+            'tags' => 'nullable',
         ];
     }
     public function getData(){
         $data = $this->validated() + [
-            'user_id' => 1, // $this->user()->id,
+            'user_id' => $this->user()->id,
             ];
         if ($this->hasFile('file')){  // برای بروز رسانی که عکس نداریم
             $directory = Image::makeDirectory();
